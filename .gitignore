@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.env
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+node_modules/
+data/raw_submissions/
+data/feature_vectors/
+data/ai_samples/
+*.pkl
+.DS_Store

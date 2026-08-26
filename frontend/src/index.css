@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+:root {
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-mono: 'Space Mono', monospace;
+  --black: #000000;
+  --off-white: #e8e4df;
+  --dim: #6b6560;
+  --border: #1a1a1a;
+  --card: #0a0a0a;
+  --accent: #c4a882;
+}
+
+html, body, #root {
+  margin: 0;
+  min-height: 100vh;
+  overflow-y: auto;
+  background: var(--black);
+  color: var(--off-white);
+}
+
+body {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  letter-spacing: 0.02em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  letter-spacing: 0.04em;
+}
+
+::selection {
+  background: rgba(196, 168, 130, 0.3);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--black);
+}
+::-webkit-scrollbar-thumb {
+  background: #222;
+  border-radius: 3px;
+}
