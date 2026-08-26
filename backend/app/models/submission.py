@@ -22,4 +22,4 @@ class Submission(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     student = relationship("Student", back_populates="submissions")
-    analysis = relationship("AnalysisResult", back_populates="submission", uselist=False)
+    analysis = relationship("AnalysisResult", back_populates="submission", uselist=False, cascade="all, delete-orphan")

@@ -18,4 +18,4 @@ class Student(Base):
 
     group = relationship("Group", back_populates="students")
     submissions = relationship("Submission", back_populates="student", cascade="all, delete-orphan")
-    profile = relationship("StyleProfile", back_populates="student", uselist=False)
+    profile = relationship("StyleProfile", back_populates="student", uselist=False, cascade="all, delete-orphan")

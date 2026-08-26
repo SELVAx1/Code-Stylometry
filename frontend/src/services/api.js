@@ -31,6 +31,7 @@ export const groups = {
   create: (name) => api.post('/groups/', { name }),
   addStudent: (groupId, data) => api.post(`/groups/${groupId}/students`, data),
   listStudents: (groupId) => api.get(`/groups/${groupId}/students`),
+  removeStudent: (groupId, studentId) => api.delete(`/groups/${groupId}/students/${studentId}`),
 }
 
 export const submissions = {

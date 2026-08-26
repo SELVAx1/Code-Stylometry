@@ -1,7 +1,7 @@
 import secrets
 
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -119,3 +119,31 @@ async def list_students(
     result = await db.execute(select(Student).where(Student.group_id == group_id))
     students = result.scalars().all()
     return [StudentResponse(id=s.id, cf_handle=s.cf_handle, name=s.name) for s in students]
+
+
+@router.delete("/{group_id}/students/{student_id}", status_code=204)
+async def delete_student(
+    group_id: str,
+    student_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    # Verify group exists and belongs to current user
+    result = await db.execute(
+        select(Group).where(Group.id == group_id, Group.owner_id == user.id)
+    )
+    group = result.scalar_one_or_none()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    # Verify student exists in this group
+    result = await db.execute(
+        select(Student).where(Student.id == student_id, Student.group_id == group_id)
+    )
+    student = result.scalar_one_or_none()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    await db.delete(student)
+    await db.commit()
+    return Response(status_code=204)

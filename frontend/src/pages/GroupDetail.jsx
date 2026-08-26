@@ -51,6 +51,20 @@ export default function GroupDetail() {
     }
   }
 
+  const handleDeleteStudent = async (e, studentId, name) => {
+    e.stopPropagation()
+    if (!window.confirm(`Are you sure you want to remove ${name} from this group? This will also delete all their submissions and style profile.`)) {
+      return
+    }
+    try {
+      await groups.removeStudent(groupId, studentId)
+      loadData()
+    } catch (err) {
+      console.error(err)
+      alert("Failed to remove student.")
+    }
+  }
+
   const handleCollectAll = async () => {
     setCollecting(true)
     try {
@@ -138,6 +152,7 @@ export default function GroupDetail() {
                 <th style={{ textAlign: 'left', padding: '14px 20px', fontSize: '13px', letterSpacing: '0.2em', color: '#6b6560', textTransform: 'uppercase', fontWeight: 400 }}>Analyzed</th>
                 <th style={{ textAlign: 'left', padding: '14px 20px', fontSize: '13px', letterSpacing: '0.2em', color: '#6b6560', textTransform: 'uppercase', fontWeight: 400 }}>Anomalies</th>
                 <th style={{ textAlign: 'left', padding: '14px 20px', fontSize: '13px', letterSpacing: '0.2em', color: '#6b6560', textTransform: 'uppercase', fontWeight: 400 }}>Score</th>
+                <th style={{ textAlign: 'right', padding: '14px 20px', fontSize: '13px', letterSpacing: '0.2em', color: '#6b6560', textTransform: 'uppercase', fontWeight: 400 }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -161,6 +176,27 @@ export default function GroupDetail() {
                     </td>
                     <td style={{ padding: '14px 20px' }}>
                       {s ? <ScoreBadge score={s.avg_anomaly_score} /> : <span style={{ color: '#3a3a3a', fontSize: '13px' }}>--</span>}
+                    </td>
+                    <td style={{ padding: '14px 20px', textAlign: 'right' }}>
+                      <button
+                        onClick={(e) => handleDeleteStudent(e, student.id, student.name)}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#6b6560',
+                          cursor: 'pointer',
+                          fontSize: '13px',
+                          letterSpacing: '0.15em',
+                          textTransform: 'uppercase',
+                          padding: '4px 8px',
+                          fontFamily: 'var(--font-mono)',
+                          transition: 'color 0.2s',
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.color = '#c47070'}
+                        onMouseOut={(e) => e.currentTarget.style.color = '#6b6560'}
+                      >
+                        Remove
+                      </button>
                     </td>
                   </tr>
                 )
