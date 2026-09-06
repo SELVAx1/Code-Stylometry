@@ -14,7 +14,7 @@ from app.models.group import Group
 from app.models.user import User
 from app.routers.auth import get_current_user
 from app.stylometry import FeatureExtractor, ProfileBuilder, AnomalyDetector
-from app.stylometry.comparator import code_similarity
+from app.stylometry.comparator import code_similarity, CROSS_SIMILARITY_THRESHOLD
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
 extractor = FeatureExtractor()
@@ -110,6 +110,7 @@ async def analyze_submission(
     analysis = detector.analyze_submission(
         source_code=submission.source_code,
         user_profile=profile.profile_data,
+        profile_submission_count=profile.submission_count,
     )
 
     # Cross-compare: find other students who solved the SAME problem and compare actual code
@@ -137,7 +138,7 @@ async def analyze_submission(
                 continue
 
             sim = code_similarity(submission.source_code, their_submission.source_code)
-            if sim > 0.3:
+            if sim > CROSS_SIMILARITY_THRESHOLD:
                 cross_matches.append({
                     "student_id": str(gs.id),
                     "student_name": gs.name,
@@ -294,6 +295,7 @@ async def analyze_all_submissions(
                 analysis_data = detector.analyze_submission(
                     source_code=sub.source_code,
                     user_profile=profile.profile_data,
+                    profile_submission_count=profile.submission_count,
                 )
 
                 # Cross-compare: same problem, other students' actual code
@@ -312,7 +314,7 @@ async def analyze_all_submissions(
                         continue
 
                     sim = code_similarity(sub.source_code, other_sub.source_code)
-                    if sim > 0.3:
+                    if sim > CROSS_SIMILARITY_THRESHOLD:
                         cross_matches.append({
                             "student_id": str(other.id),
                             "student_name": other.name,

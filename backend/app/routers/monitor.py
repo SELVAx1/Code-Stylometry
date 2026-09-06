@@ -72,7 +72,7 @@ async def fetch_pending_source(
 
     from app.models.profile import StyleProfile
     from app.stylometry import FeatureExtractor, AnomalyDetector
-    from app.stylometry.comparator import code_similarity
+    from app.stylometry.comparator import code_similarity, CROSS_SIMILARITY_THRESHOLD
 
     extractor = FeatureExtractor()
     detector = AnomalyDetector()
@@ -148,6 +148,7 @@ async def fetch_pending_source(
             analysis = detector.analyze_submission(
                 source_code=sub.source_code,
                 user_profile=profile.profile_data,
+                profile_submission_count=profile.submission_count,
             )
 
             # Cross-compare: same problem, other students
@@ -173,7 +174,7 @@ async def fetch_pending_source(
                 if not other_sub or not other_sub.source_code.strip():
                     continue
                 sim = code_similarity(sub.source_code, other_sub.source_code)
-                if sim > 0.3:
+                if sim > CROSS_SIMILARITY_THRESHOLD:
                     cross_matches.append({
                         "student_id": str(other.id),
                         "student_name": other.name,

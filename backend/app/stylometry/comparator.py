@@ -4,6 +4,33 @@ from difflib import SequenceMatcher
 import numpy as np
 
 
+CP_BOILERPLATE = [
+    r'#include\s*<[^>]+>',
+    r'#include\s*"[^"]+"',
+    r'using\s+namespace\s+std\s*;',
+    r'ios_base\s*::\s*sync_with_stdio\s*\([^)]*\)\s*;',
+    r'ios\s*::\s*sync_with_stdio\s*\([^)]*\)\s*;',
+    r'cin\s*\.\s*tie\s*\([^)]*\)\s*;',
+    r'cout\s*\.\s*tie\s*\([^)]*\)\s*;',
+    r'int\s+main\s*\([^)]*\)\s*\{',
+    r'return\s+0\s*;',
+    r'#define\s+ll\s+long\s+long',
+    r'#define\s+pb\s+push_back',
+    r'#define\s+endl\s+.*',
+    r'typedef\s+long\s+long\s+ll\s*;',
+]
+
+BOILERPLATE_RE = re.compile('|'.join(CP_BOILERPLATE), re.MULTILINE)
+
+CROSS_SIMILARITY_THRESHOLD = 0.7
+
+
+def strip_boilerplate(code: str) -> str:
+    code = BOILERPLATE_RE.sub('', code)
+    code = re.sub(r'\s+', ' ', code).strip()
+    return code
+
+
 def normalize_code(code: str) -> str:
     code = re.sub(r'//.*', '', code)
     code = re.sub(r'/\*.*?\*/', '', code, flags=re.DOTALL)
@@ -16,14 +43,14 @@ def tokenize_code(code: str) -> list[str]:
 
 
 def code_similarity(code_a: str, code_b: str) -> float:
-    norm_a = normalize_code(code_a)
-    norm_b = normalize_code(code_b)
+    stripped_a = strip_boilerplate(normalize_code(code_a))
+    stripped_b = strip_boilerplate(normalize_code(code_b))
 
-    if not norm_a or not norm_b:
+    if not stripped_a or not stripped_b:
         return 0.0
 
-    tokens_a = tokenize_code(norm_a)
-    tokens_b = tokenize_code(norm_b)
+    tokens_a = tokenize_code(stripped_a)
+    tokens_b = tokenize_code(stripped_b)
 
     if not tokens_a or not tokens_b:
         return 0.0
@@ -55,7 +82,7 @@ class StyleComparator:
                 if value == mean:
                     z_score = 0.0
                 else:
-                    z_score = 10.0  # never seen this variation
+                    z_score = 2.0
             else:
                 z_score = abs(value - mean) / std
 
@@ -88,7 +115,6 @@ class StyleComparator:
         vec_a = np.array([profile_a[k]["mean"] for k in common_keys])
         vec_b = np.array([profile_b[k]["mean"] for k in common_keys])
 
-        # normalize
         norms_a = np.linalg.norm(vec_a)
         norms_b = np.linalg.norm(vec_b)
 
@@ -113,9 +139,9 @@ class StyleComparator:
         return results
 
     def _z_to_severity(self, z_score: float) -> str:
-        if z_score < 1.5:
+        if z_score < 2.0:
             return "LOW"
-        elif z_score < 3.0:
+        elif z_score < 3.5:
             return "MEDIUM"
         else:
             return "HIGH"
